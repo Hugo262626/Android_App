@@ -54,6 +54,22 @@
                     <div class="row row-cards" id="users-list">
                         <!-- Liste des utilisateurs sera remplie via JS -->
                     </div>
+
+                    <!-- Liste des utilisateurs pour les admins -->
+                    @role('admin')
+                    <section>
+                        <h3>Liste des utilisateurs</h3>
+                        <ul id="user-list" class="list-group">
+                            @foreach ($users as $user)
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ $user->name }} - {{ $user->email }}
+                                    <button class="btn btn-danger btn-sm" onclick="deleteUser({{ $user->id }})">Supprimer</button>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                    @endrole
+
                     <div class="d-flex mt-4">
                         <ul class="pagination ms-auto">
                             <li class="page-item disabled">
@@ -182,7 +198,7 @@
             document.getElementById('profile-info').innerHTML = `
                 <p><strong>Nom :</strong> ${data.name || 'Non défini'}</p>
                 <p><strong>Email :</strong> ${data.email || 'Non défini'}</p>
-                <p><strong>Présentation :</strong> ${data.description || 'Non définie'}</p>
+                <p><strong>Présentation :</strong> ${data.description || 'Non définée'}</p>
                 <p><strong>Date de naissance :</strong> ${data.birth || 'Non définie'}</p>
                 ${data.photo ? `<img src="${data.photo}" alt="Photo de profil" class="img-thumbnail" style="max-width: 200px;">` : ''}
             `;
@@ -290,6 +306,32 @@
         } catch (error) {
             console.error('Erreur lors de la récupération des utilisateurs:', error);
             document.getElementById('users-list').innerHTML = '<p class="text-danger">Erreur lors du chargement des utilisateurs.</p>';
+        }
+    }
+
+    // Supprimer un utilisateur
+    async function deleteUser(userId) {
+        if (!confirm("Es-tu sûr de vouloir supprimer cet utilisateur ?")) return;
+
+        try {
+            const response = await fetch(`/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            alert(result.message || 'Utilisateur supprimé');
+            location.reload(); // Recharge la page pour mettre à jour la liste
+        } catch (error) {
+            console.error('Erreur suppression utilisateur:', error);
+            alert('Erreur lors de la suppression de l’utilisateur');
         }
     }
 

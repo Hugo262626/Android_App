@@ -23,17 +23,21 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+        public function boot()
     {
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
+            Route::prefix('api')->group(function () {
+                Route::post('/login', [AuthController::class, 'login']);
+                Route::post('/register', [AuthController::class, 'register']);
+                Route::middleware(['api', 'jwt.auth'])->group(base_path('routes/api.php'));
+            });
 
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
+            Route::middleware('web')->group(base_path('routes/web.php'));
         });
     }
+    protected $middlewareAliases = [
+        'jwt.auth' => \App\Http\Middleware\JWTAuthMiddleware::class,
+    ];
 
     /**
      * Configurer la limitation de taux des requêtes.

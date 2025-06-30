@@ -28,3 +28,4 @@ Route::get('/web/profile', [AuthController::class, 'getWebProfile'])->name('web.
 Route::patch('/web/profile', [AuthController::class, 'updateWebProfile'])->name('web.profile.update');
 Route::get('/web/users', [AuthController::class, 'getWebUsers'])->name('web.users');
 });
+Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('admin.users.destroy')->middleware(['auth', 'role:admin']);
